@@ -1,0 +1,65 @@
+package traductor;
+
+import java_cup.runtime.*;
+import traductor.Oracion;
+
+
+parser code{:
+    
+   public String errores = "";
+    
+    public void syntax_error(Symbol sim){
+        Token token = (Token) sim.value;
+        report_error("Error de sintaxis. Linea: "+(token.getLinea() + 1)+
+                   ". En: \"" + token.getNombre()+"\".",null);
+    }
+
+    public void decInv(String pDato){
+        errores += " Declaración de "+pDato+" inválida.\n";
+    }
+    
+    public void addDescripcion(String pDescripcion){
+        errores += " "+pDescripcion+".\n";
+    }
+:}
+
+action code{:
+    
+:}
+
+
+//TERMINALES
+terminal     VERBO,SUSTANTIVO,ADJETIVO,ADVERBIO,PREPOSICION,NOMBRE_PROPIO;
+terminal     PALABRA_RESERVADA, PRONOMBRE, LITERAL, SIGNO_PUNTUACION, ERROR_LEXICO;
+terminal     OTRO;
+
+//NO TERMINALES
+non terminal Texto, Pregunta, Respuesta, Oracion, Numero, OracionBasica, BaseOracion;
+
+start with Texto;
+
+
+//GRAMATICA
+Texto ::= Oracion SIGNO_PUNTUACION:sp1 {: Token sp1n = (Token)sp1; System.out.println(sp1n.getNombre()); :}
+ | Oracion
+;
+
+Oracion ::= OracionBasica
+    | BaseOracion
+    | PRONOMBRE:pron1 {: Token pron1n = (Token)pron1; Oracion x = new Oracion(pron1n.getNombre()); :} VERBO:verb1 {: Token verb1n = (Token)verb1; Oracion x = new Oracion(verb1n.getNombre()); :} PALABRA_RESERVADA:pr1 {: Token pr1n = (Token)pr1; Oracion x = new Oracion(pr1n.getNombre()); :} SUSTANTIVO:sust1 {: Token sust1n = (Token)sust1; Oracion x = new Oracion(sust1n.getNombre()); x.getPalabras(); :}
+    | NOMBRE_PROPIO:np1 {: Token np1n = (Token)np1; Oracion x = new Oracion(np1n.getNombre()); :} VERBO:verb1 {: Token verb1n = (Token)verb1; Oracion x = new Oracion(verb1n.getNombre()); :} PALABRA_RESERVADA:pr1 {: Token pr1n = (Token)pr1; Oracion x = new Oracion(pr1n.getNombre()); :} SUSTANTIVO:sust1 {: Token sust1n = (Token)sust1; Oracion x = new Oracion(sust1n.getNombre()); x.getPalabras(); :}    
+    | OracionBasica SUSTANTIVO:sust2 {: Token sust2n = (Token)sust2; Oracion x = new Oracion(sust2n.getNombre()); :} PREPOSICION:prep1 {: Token prep1n = (Token)prep1; Oracion x = new Oracion(prep1n.getNombre()); x.getPalabras(); :}
+    | Numero
+    | LITERAL:lit1{: Token lit1n = (Token)lit1; Oracion x = new Oracion(lit1n.getNombre()); x.getPalabras(); :} OracionBasica
+    | ADJETIVO:adj1{: Token adj1n = (Token)adj1; Oracion x = new Oracion(adj1n.getNombre()); :} SUSTANTIVO:sust3 {: Token sust3n = (Token)sust3; Oracion x = new Oracion(sust3n.getNombre()); :} VERBO:verb1 {: Token verb1n = (Token)verb1; Oracion x = new Oracion(verb1n.getNombre()); :} Numero SUSTANTIVO:sust1 {: Token sust1n = (Token)sust1; Oracion x = new Oracion(sust1n.getNombre()); x.getPalabras(); :}
+;
+
+OracionBasica ::=  SUSTANTIVO:sust1 {: Token sust1n = (Token)sust1; Oracion x = new Oracion(sust1n.getNombre()); :}
+    | BaseOracion SUSTANTIVO:sust1 {: Token sust1n = (Token)sust1; Oracion x = new Oracion(sust1n.getNombre()); :} PREPOSICION:prep1 {: Token prep1n = (Token)prep1; Oracion x = new Oracion(prep1n.getNombre()); x.getPalabras(); :}
+    ;
+
+BaseOracion ::= Numero SUSTANTIVO:sust1 {: Token sust1n = (Token)sust1; Oracion x = new Oracion(sust1n.getNombre()); :} OTRO:o1 {: Token o1n = (Token)o1; Oracion x = new Oracion(o1n.getNombre()); x.getPalabras(); :};
+
+Numero ::= PALABRA_RESERVADA:pr3 {: Token pr3n = (Token)pr3; Oracion x = new Oracion(pr3n.getNombre()); :}
+    | PALABRA_RESERVADA:pr1 {: Token pr1n = (Token)pr1; Oracion x = new Oracion(pr1n.getNombre()); :} OTRO:o {: Token on = (Token)o; Oracion x = new Oracion(on.getNombre()); :} OTRO:o2 {: Token o2n = (Token)o2; Oracion x = new Oracion(o2n.getNombre()); :} PALABRA_RESERVADA:pr2 {: Token pr2n = (Token)pr2; Oracion x = new Oracion(pr2n.getNombre()); x.getPalabras(); :};
+
